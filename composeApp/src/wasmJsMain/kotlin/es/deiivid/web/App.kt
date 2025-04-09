@@ -1,75 +1,144 @@
 package es.deiivid.web
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import deiividweb.composeapp.generated.resources.Res
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.*
+import deiividweb.composeapp.generated.resources.*
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.*
 
 @Composable
-fun AnimatedHeader() {
-    var showDescription by remember { mutableStateOf(false) }
-    // Lanzamos un efecto para que la descripción aparezca con un delay
-    LaunchedEffect(Unit) {
-        delay(1000) // 1 segundo de delay
-        showDescription = true
+fun App() {
+    MaterialTheme(colors = darkColors()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HeroSection()
+                Spacer(modifier = Modifier.height(48.dp))
+                TechCarousel()
+                Spacer(modifier = Modifier.height(32.dp))
+                //SkillsSection()
+                Spacer(modifier = Modifier.height(32.dp))
+                PortfolioSection()
+            }
+        }
     }
+}
+@Composable
+fun HeroSection() {
+    var showText by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(500)
+        showText = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp),
+            .height(500.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Imagen central (tu foto)
-    /*    Image(
-            painter = painterResource(Res.drawable.),
-            contentDescription = "Mi Foto",
+        Image(
+            painter = painterResource(Res.drawable.yo),
+            contentDescription = "David Navarro",
             modifier = Modifier
-                .width(200.dp)
-                .height(200.dp)
-        )*/
-        // Un ejemplo de logo posicionado arriba (Kotlin) - repite para cada logo con posiciones distintas
-        Box(
-            modifier = Modifier
-                .absoluteOffset(x = 0.dp, y = (-150).dp)
+                .size(200.dp)
+                .align(Alignment.Center)
+        )
+
+        TechIcon(Res.drawable.kotlin, 0.dp, -130.dp) // arriba
+        TechIcon(Res.drawable.android, 130.dp, 0.dp) // derecha
+        TechIcon(Res.drawable.apple, 0.dp, 130.dp) // abajo
+        TechIcon(Res.drawable.git, -100.dp, -100.dp) // arriba izquierda
+        TechIcon(Res.drawable.gitHub, 100.dp, -100.dp) // arriba derecha
+        TechIcon(Res.drawable.java, 100.dp, 100.dp) // abajo derecha
+
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            /*Image(
-                painter = painterResource(Res.drawable),
-                contentDescription = "Kotlin Logo",
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(50.dp)
-                // Aquí podrías agregar una animación CSS o usar APIs de animación de Compose
-            )*/
-        }
-        // La descripción que aparece con fadeIn
-        AnimatedVisibility(
-            visible = showDescription,
-            enter = fadeIn(animationSpec = tween(durationMillis = 500))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .absoluteOffset(y = 220.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Soy David, desarrollador móvil apasionado por la tecnología.")
+            AnimatedVisibility(showText, enter = fadeIn(tween(1000))) {
+                Text("Hello 👋 I'm", color = Color.White, style = MaterialTheme.typography.h5)
+            }
+            AnimatedVisibility(showText, enter = fadeIn(tween(1500))) {
+                Text("David Navarro", color = Color.White, style = MaterialTheme.typography.h3)
+            }
+            AnimatedVisibility(showText, enter = fadeIn(tween(2000))) {
+                Text("Mobile Developer (Android | Compose | KMP)", color = Color.Gray)
             }
         }
     }
 }
 
+@Composable
+fun TechIcon(res: DrawableResource, offsetX: Dp, offsetY: Dp) {
+    Image(
+        painter = painterResource(res),
+        contentDescription = null,
+        modifier = Modifier
+            .size(48.dp)
+            .absoluteOffset(x = offsetX, y = offsetY)
+    )
+}
+
+@Composable
+fun TechCarousel() {
+    val techIcons = listOf(
+        Res.drawable.kotlin,
+        Res.drawable.java,
+        Res.drawable.android,
+        Res.drawable.apple,
+        Res.drawable.git,
+        Res.drawable.gitHub,
+
+        )
+    val infiniteScroll = rememberInfiniteTransition()
+    val offsetX by infiniteScroll.animateFloat(
+        initialValue = 0f,
+        targetValue = -600f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clipToBounds()
+    ) {
+        Row(
+            modifier = Modifier.offset(x = offsetX.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            (techIcons + techIcons).forEach { icon ->
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .size(32.dp)
+                )
+            }
+        }
+    }
+}
 @Composable
 fun SkillsSection() {
     val skills = listOf("Kotlin", "Android", "Java", "Compose", "KMP", "iOS", "JS")
@@ -77,14 +146,13 @@ fun SkillsSection() {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Mis Skills", modifier = Modifier.padding(16.dp))
+        Text("Mis Skills", color = Color.White, modifier = Modifier.padding(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             skills.forEach { skill ->
                 var visible by remember { mutableStateOf(false) }
-                // Cada skill aparece con un delay (puedes ajustar o usar el índice para escalonar)
                 LaunchedEffect(skill) {
                     delay(500)
                     visible = true
@@ -92,20 +160,13 @@ fun SkillsSection() {
                 AnimatedVisibility(
                     visible = visible,
                     enter = slideInVertically(
-                        initialOffsetY = { it }, // Aparece desde abajo
+                        initialOffsetY = { it },
                         animationSpec = tween(durationMillis = 500)
                     )
                 ) {
                     Button(
                         modifier = Modifier.padding(8.dp),
-                        onClick = TODO(),
-                        enabled = TODO(),
-                        interactionSource = TODO(),
-                        elevation = TODO(),
-                        shape = TODO(),
-                        border = TODO(),
-                        colors = TODO(),
-                        contentPadding = TODO()
+                        onClick = {},
                     ) {
                         Text(skill)
                     }
@@ -124,8 +185,7 @@ fun PortfolioSection() {
             .padding(top = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Portfolio", modifier = Modifier.padding(16.dp))
-        // Simulamos una grid simple con Column y Row; en un caso real, podrías crear un layout más avanzado
+        Text("Portfolio", color = Color.White, modifier = Modifier.padding(16.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -138,29 +198,12 @@ fun PortfolioSection() {
                         .height(150.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Cada proyecto con un fondo y descripción breve
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(project)
-                        Text("Descripción breve del proyecto.")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(project, color = Color.White)
+                        Text("Descripción breve del proyecto.", color = Color.Gray)
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun App() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AnimatedHeader()
-            SkillsSection()
-            PortfolioSection()
         }
     }
 }
